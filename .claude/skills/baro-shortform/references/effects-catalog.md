@@ -1,7 +1,7 @@
 # 효과 이름 통합 목록 (레퍼런스별)
 
 2026-10-24 정리. 원장님이 공유한 인스타 레퍼런스에서 나온 **효과 이름**을 한곳에 모았어요. 이름은 레퍼런스 표기 그대로, 상태는 우리 스킬 기준.
-상태: ✅ 지금 쓸 수 있음 · 🔧 코드로 만들 수 있음(아직 없음) · 🎥 촬영이 필요 · ✗ 안 씀
+상태: ✅ 지금 쓸 수 있음 (설정법은 [options.md](options.md) 9번) · 🔧 코드로 만들 수 있음(아직 없음) · 🎥 촬영이 필요 · ✗ 안 씀
 
 ## 레퍼런스
 | 레퍼런스 | 내용 | 자세히 |
@@ -28,20 +28,20 @@
 | Word captions | KMH·YSA | 한두 단어씩 큰 자막 | ✅ | 02 바로 자막 |
 | Follow card | 자체 | 계정 팔로우 카드 | ✅ | `follow` (기본 켬) |
 | Headline (위쪽 큰 제목) | wavideo | 위 띠 컬러 헤드라인 | ✗ 원장님 비선호 | 제목 `title`로 대체 |
-| Pull-back reveal | 17 | 영상이 작아지며 화면 공개 | 🔧 (줌 역방향 일부) | — |
-| Green screen | 17 | 배경 교체 | 🔧 마스크 필요 | — |
-| UI world / Apple UI key cards | 17·15 | 앱 같은 UI 카드 | 🔧 | — |
-| Phone mockup | 17 | 옆에 폰 화면 | 🔧 직접 만든 화면만 | — |
-| Freebie doc | 15 | 자료 표지 카드 | 🔧 | — |
-| Orbit | 17 | 사진이 사람 주위를 돎 | 🔧 | — |
-| Headline wall | 17 | 제목 카드들이 흩어짐 | 🔧 (가짜 기사 금지) | — |
-| Chart grow / Velocity line graph | 17·15 | 그래프가 자람 | 🔧 병원 확정 수치만 | — |
-| Iris effect | 15 | 원형으로 열리는 전환 | 🔧 | — |
-| Paper cut | 17 | 종이 콜라주 | 🔧 | — |
-| Doodle boil | 17 | 사람 외곽 손그림 선 | 🔧 마스크 필요 | — |
-| Frame break | 17 | 액자 밖으로 튀어나옴 | 🔧 마스크 + 삼각대 | — |
-| Cursor tracker / Pixelated close up | 15 | 화면 녹화 강조 | 🔧 화면 녹화 필요 | — |
-| Couch wall | 17 | 벽에 사진 액자 | 🎥🔧 삼각대 | — |
+| Pull-back reveal | 17 | 영상이 작아지며 화면 공개 | ✅ (2026-10-24 설치) | `vfx pull_back` |
+| Green screen | 17 | 배경 교체 | ✅ (2026-10-24 설치) — 마스크 필요 | `vfx green_screen` |
+| UI world / Apple UI key cards | 17·15 | 앱 같은 UI 카드 | ✅ (2026-10-24 설치) | `fx ui_card` |
+| Phone mockup | 17 | 옆에 폰 화면 | ✅ (2026-10-24 설치) | `fx phone` |
+| Freebie doc | 15 | 자료 표지 카드 | ✅ (2026-10-24 설치) | `fx freebie` |
+| Orbit | 17 | 사진이 사람 주위를 돎 | ✅ (2026-10-24 설치) | `fx orbit` |
+| Headline wall | 17 | 제목 카드들이 흩어짐 | ✅ (2026-10-24 설치) | `fx headline_wall` |
+| Chart grow / Velocity line graph | 17·15 | 그래프가 자람 | ✅ (2026-10-24 설치) | `fx chart` |
+| Iris effect | 15 | 원형으로 열리는 전환 | ✅ (2026-10-24 설치) | `fx iris` |
+| Paper cut | 17 | 종이 콜라주 | ✅ (2026-10-24 설치) | `fx paper_cut` |
+| Doodle boil | 17 | 사람 외곽 손그림 선 | ✅ (2026-10-24 설치) — 마스크 필요 | `vfx doodle` |
+| Frame break | 17 | 액자 밖으로 튀어나옴 | ✅ (2026-10-24 설치) — 마스크 필요 | `vfx frame_break` |
+| Cursor tracker / Pixelated close up | 15 | 화면 녹화 강조 | ✅ (2026-10-24 설치) | `fx cursor` · `vfx pixelate` |
+| Couch wall | 17 | 벽에 사진 액자 | ✅ (2026-10-24 설치) | `fx couch_wall` |
 | Zoom-through cut | 17·15 | 한 점으로 빨려 들어가는 전환 | 🎥 두 번째 장면 | — |
 | Match cut | 15 | 같은 구도 장면 전환 | 🎥 | — |
 | Over the shoulder zoom | 15 | 어깨 너머 확대 | 🎥 | — |

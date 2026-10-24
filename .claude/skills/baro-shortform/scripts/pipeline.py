@@ -19,6 +19,7 @@ plan.json 형식은 references/plan-schema.md. 모든 시각은 **컷·배속 �
 """
 import hashlib
 import json
+import os
 import math
 import re
 import shutil
@@ -28,11 +29,15 @@ from pathlib import Path
 
 SKILL = Path(__file__).resolve().parent.parent
 STUDIO = SKILL.parent.parent.parent                      # shortform-studio
-TOOLS = STUDIO.parent / "tools"
+# 도구(파이썬 venv·whisper)와 Playwright 위치: 환경변수 BARO_TOOLS·BARO_NODE_MODULES, 없으면 옆 폴더에서 찾는다
+# (2026-10-24 대시보드 저장소에서 독립 이관 — 도구는 아직 02.Marketing Dashboard에 있음)
+_first = lambda *ps: next((p for p in ps if p.exists()), ps[0])
+TOOLS = Path(os.environ["BARO_TOOLS"]) if os.environ.get("BARO_TOOLS") else _first(STUDIO.parent / "tools", STUDIO.parent / "02.Marketing Dashboard" / "tools")
 WHISPER = TOOLS / "vendor" / "whisper.cpp"
 WHISPER_BIN = WHISPER / "build" / "bin" / "whisper-cli"
 WHISPER_MODEL = WHISPER / "models" / "ggml-large-v3-turbo.bin"
-PW_MODULE = STUDIO.parent / "node_modules" / "@playwright" / "test" / "index.mjs"
+_NM = Path(os.environ["BARO_NODE_MODULES"]) if os.environ.get("BARO_NODE_MODULES") else _first(STUDIO / "node_modules", STUDIO.parent / "node_modules", STUDIO.parent / "02.Marketing Dashboard" / "node_modules")
+PW_MODULE = _NM / "@playwright" / "test" / "index.mjs"
 SFX_DIR = STUDIO / "assets" / "sfx" / "ready"
 OUTPUT = STUDIO / "output"
 W, H, FPS = 1080, 1920, 30
@@ -66,6 +71,12 @@ def sha256(path):
         for b in iter(lambda: f.read(1 << 20), b""):
             h.update(b)
     return h.hexdigest()
+
+
+def src_input(info):
+    """원본 경로. 폴더를 옮겨 예전 절대 경로가 없으면 지금 스튜디오의 input/raw에서 같은 이름을 찾는다."""
+    p = Path(info["input"])
+    return p if p.exists() else STUDIO / "input" / "raw" / p.name
 
 
 def load(work):
@@ -289,7 +300,7 @@ def cmd_cut(work, speed=1.1, lead=1.2, tail=0.35, min_gap=0.25, pad_before=0.10,
         fc += f"[d{i}]atrim={s}:{e},asetpts=PTS-STARTPTS,afade=t=in:d=0.01,afade=t=out:st={max(0, L - 0.01):.3f}:d=0.01[s{i}];"
     fc += "".join(f"[s{i}]" for i in range(n)) + f"concat=n={n}:v=0:a=1" + (f",atempo={edl['speed']}" if edl["speed"] != 1 else "") + "[cut]"
     (work / "audio_filter.txt").write_text(fc)
-    ff("-i", info["input"], "-/filter_complex", work / "audio_filter.txt", "-map", "[cut]", "-ar", 48000, "-ac", 2, work / "audio_cut_pre.wav")
+    ff("-i", src_input(info), "-/filter_complex", work / "audio_filter.txt", "-map", "[cut]", "-ar", 48000, "-ac", 2, work / "audio_cut_pre.wav")
     err = run(["ffmpeg", "-hide_banner", "-nostats", "-i", str(work / "audio_cut_pre.wav"), "-af", "loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json", "-f", "null", "-"]).stderr
     m = json.loads(err[err.rindex("{"):err.rindex("}") + 1])
     ln = (f"loudnorm=I=-14:TP=-1.5:LRA=11:measured_I={m['input_i']}:measured_TP={m['input_tp']}:measured_LRA={m['input_lra']}"
@@ -322,7 +333,7 @@ def cmd_frames(work):
     shutil.rmtree(out, ignore_errors=True)
     out.mkdir()
     vf = f"fps={FPS},scale={SRC_W}:{SRC_H}:force_original_aspect_ratio=increase:flags=lanczos,crop={SRC_W}:{SRC_H}"
-    ff("-i", info["input"], "-vf", vf, "-q:v", 2, out / "s%05d.jpg")
+    ff("-i", src_input(info), "-vf", vf, "-q:v", 2, out / "s%05d.jpg")
     print("원본 프레임", len(list(out.glob("*.jpg"))))
 
 
@@ -385,6 +396,18 @@ def cmd_overlay(work):
         if not src.exists():
             sys.exit(f"사진 없음: {src}")
         x["src"] = src.resolve().as_uri()
+    def uri(v):
+        src = Path(v) if Path(v).is_absolute() else (work / v)
+        if not src.exists():
+            sys.exit(f"사진 없음: {src}")
+        return src.resolve().as_uri()
+    for x in plan.get("fx", []):   # 레퍼런스 효과의 사진 경로 → 파일 URL
+        if x.get("src"):
+            x["src"] = uri(x["src"])
+        if x.get("srcs"):
+            x["srcs"] = [uri(v) for v in x["srcs"]]
+        for r in x.get("frames", []):
+            r["src"] = uri(r["src"])
     render_plan = work / "_plan_render.json"
     save(render_plan, plan)
     behind = (plan.get("keyword") or {}).get("layer") == "behind"
@@ -468,23 +491,32 @@ def background_busyness(work):
     return sum(vals) / max(1, len(vals))
 
 
-def behind_src_frames(work):
-    """사람 뒤 핵심어가 보이는 출력 구간에 해당하는 원본 프레임 번호들."""
+MASK_VFX = ("green_screen", "frame_break", "doodle")   # 사람 마스크가 필요한 영상 효과
+
+
+def behind_src_frames(work, step=1):
+    """사람 마스크가 필요한 출력 구간(사람 뒤 핵심어, green_screen·frame_break·doodle)의 원본 프레임 번호들.
+    step>1이면 그 간격으로만 만들고 합성할 때 가까운 마스크를 쓴다 (앉아서 말하는 영상이라 움직임이 작음)."""
     plan, edl = plan_of(work), json.loads((work / "edl.json").read_text())
+    spans = []
     K = plan.get("keyword") or {}
-    if K.get("layer") != "behind":
+    if K.get("layer") == "behind":
+        spans.append((K["start"], K["end"]))
+    spans += [(v["start"], v["end"]) for v in plan.get("vfx", []) if v["type"] in MASK_VFX]
+    if not spans:
         return []
     to_src = to_src_fn(edl)
     n_src = len(list((work / "frames_src").glob("s*.jpg")))
-    return sorted({min(n_src - 1, round(to_src(i / FPS) * FPS)) for i in range(int(K["start"] * FPS), int(math.ceil(K["end"] * FPS)) + 1)})
+    idx = sorted({min(n_src - 1, round(to_src(i / FPS) * FPS)) for a, b in spans for i in range(int(a * FPS), int(math.ceil(b * FPS)) + 1)})
+    return idx if step <= 1 else sorted({i - i % step for i in idx})
 
 
-def cmd_masks(work):
-    """03 바로 레이어: 핵심어 구간 원본 프레임만 rembg(birefnet-portrait)로 사람 마스크를 만든다. CPU 프레임당 약 40초."""
+def cmd_masks(work, step=1):
+    """사람 마스크가 필요한 구간의 원본 프레임만 rembg(birefnet-portrait)로 마스크를 만든다. CPU 프레임당 약 40초."""
     work = Path(work).resolve()
-    idxs = behind_src_frames(work)
+    idxs = behind_src_frames(work, step)
     if not idxs:
-        sys.exit("plan.json의 keyword.layer가 \"behind\"가 아니라 마스크가 필요 없어요")
+        sys.exit("사람 마스크가 필요한 효과가 없어요 (keyword.layer behind 또는 vfx green_screen·frame_break·doodle)")
     stage, masks = work / "mask_src", work / "masks"
     masks.mkdir(exist_ok=True)
     shutil.rmtree(stage, ignore_errors=True)
@@ -521,6 +553,92 @@ def zoom_at(plan, t):
     return z
 
 
+def nearest_mask(work, idx, box):
+    """원본 프레임 idx에 가장 가까운 사람 마스크를 지금 화면(줌 상자 box)에 맞춰 돌려준다."""
+    from PIL import Image
+    have = getattr(nearest_mask, "have", None)
+    if have is None:
+        have = nearest_mask.have = sorted(int(p.stem[1:]) - 1 for p in (work / "masks").glob("s*.png"))
+    if not have:
+        sys.exit("마스크 없음 (pipeline.py masks 먼저 실행)")
+    j = min(have, key=lambda k: abs(k - idx))
+    if abs(j - idx) > 6:
+        sys.exit(f"마스크가 멀어요: 프레임 {idx + 1} 근처에 없음 (masks 다시 실행)")
+    return Image.open(work / "masks" / f"s{j + 1:05d}.png").convert("L").resize((SRC_W, SRC_H)).crop(box).resize((W, H), Image.LANCZOS)
+
+
+def apply_vfx(v, t, img, mask, work):
+    """레퍼런스 영상 효과 (plan.vfx[]). img: 지금 프레임(RGBA 1080x1920), mask(): 사람 마스크."""
+    from PIL import Image, ImageDraw, ImageFilter, ImageChops
+    d = t - v["start"]
+    e = 1 - (1 - min(1.0, d / v.get("ramp", 0.5))) ** 3
+    back = lambda: img.filter(ImageFilter.GaussianBlur(40)).point(lambda x: x * 0.55)
+    def rounded(im, r):
+        m = Image.new("L", im.size, 0)
+        ImageDraw.Draw(m).rounded_rectangle((0, 0, im.size[0] - 1, im.size[1] - 1), r, fill=255)
+        return m
+    if v["type"] == "pull_back":   # 화면이 작아지며 둥근 액자로 (뒤는 흐린 같은 화면)
+        s = 1 - (1 - v.get("to", 0.68)) * e
+        if s >= 0.999:
+            return img
+        w, h = round(W * s), round(H * s)
+        small = img.resize((w, h), Image.LANCZOS)
+        out = back()
+        x, y = (W - w) // 2, round((H - h) * v.get("y", 0.42))
+        ImageDraw.Draw(out).rounded_rectangle((x - 8, y - 8, x + w + 8, y + h + 8), 48, fill=(255, 255, 255, 255))
+        out.paste(small, (x, y), rounded(small, 42))
+        return out
+    if v["type"] == "green_screen":   # 사람만 남기고 배경 바꾸기 (사진 또는 색)
+        bg = v.get("bg", "#E8F1EE")
+        if bg.startswith("#"):
+            new = Image.new("RGBA", (W, H), bg)
+        else:
+            src = Path(bg) if Path(bg).is_absolute() else work / bg
+            new = Image.open(src).convert("RGBA")
+            sc = max(W / new.width, H / new.height)
+            new = new.resize((round(new.width * sc), round(new.height * sc)), Image.LANCZOS)
+            new = new.crop(((new.width - W) // 2, (new.height - H) // 2, (new.width - W) // 2 + W, (new.height - H) // 2 + H))
+        m = mask().point(lambda x: round(255 - (255 - x) * e))   # 처음 0.5초 동안 배경이 서서히 바뀜
+        return Image.composite(img, new, m)
+    if v["type"] == "frame_break":   # 액자 안 영상에서 머리가 액자 밖으로 튀어나옴
+        s = 1 - (1 - v.get("scale", 0.8)) * e
+        w, h = round(W * s), round(H * s)
+        x, y = (W - w) // 2, round((H - h) * 0.6)
+        small, m = img.resize((w, h), Image.LANCZOS), mask().resize((w, h), Image.LANCZOS)
+        top = y + round(h * v.get("cut", 0.42) * e)   # 액자 윗변 (머리 아래쪽)
+        out = back()
+        dr = ImageDraw.Draw(out)
+        dr.rounded_rectangle((x - 10, top - 10, x + w + 10, y + h + 10), 40, fill=(255, 255, 255, 255))
+        inner = small.crop((0, top - y, w, h))
+        out.paste(inner, (x, top), rounded(inner, 34))
+        cut = small.copy()
+        cut.putalpha(m)
+        head = cut.crop((0, 0, w, top - y + 40))
+        out.alpha_composite(head, (x, y))
+        return out
+    if v["type"] == "doodle":   # 사람 외곽을 따라 꿈틀대는 손그림 선
+        m = mask().point(lambda x: 255 if x > 128 else 0)
+        k = int(d / v.get("boil", 0.12)) % 3   # 0.12초마다 선 모양을 바꿔 손그림처럼
+        r = v.get("width", 7) + (2, 0, 3)[k]
+        big = m.filter(ImageFilter.MaxFilter(2 * r + 1))
+        edge = ImageChops.subtract(big, m.filter(ImageFilter.MaxFilter(2 * max(1, r - 7) + 1)))
+        edge = ImageChops.offset(edge, (1, -1, 2)[k], (-1, 1, 0)[k])
+        line = Image.new("RGBA", (W, H), v.get("color", "#FFFFFF"))
+        line.putalpha(edge.point(lambda x: x * e))
+        return Image.alpha_composite(img, line)
+    if v["type"] == "pixelate":   # 한 부분으로 확대하며 픽셀 질감
+        bx, by, bw, bh = v.get("box", [140, 300, 800, 600])
+        z = e
+        x0, y0 = bx * z, by * z
+        x1, y1 = W + (bx + bw - W) * z, H + (by + bh - H) * z
+        ar = W / H   # 화면 비율 유지
+        cx, cy, hh = (x0 + x1) / 2, (y0 + y1) / 2, max(y1 - y0, (x1 - x0) / ar)
+        crop = img.crop((round(cx - hh * ar / 2), round(cy - hh / 2), round(cx + hh * ar / 2), round(cy + hh / 2))).resize((W, H), Image.LANCZOS)
+        b = max(1, round(v.get("block", 22) * e))
+        return crop.resize((W // b, H // b), Image.BILINEAR).resize((W, H), Image.NEAREST) if b > 1 else crop
+    sys.exit(f"모르는 vfx: {v['type']}")
+
+
 def cmd_compose(work):
     from PIL import Image
     work = Path(work).resolve()
@@ -554,6 +672,9 @@ def cmd_compose(work):
                 cut = img.copy()
                 cut.putalpha(Image.open(mask).convert("L").resize((SRC_W, SRC_H)).crop(box).resize((W, H), Image.LANCZOS))
                 img = Image.alpha_composite(Image.alpha_composite(img, text), cut)
+        for v in plan.get("vfx", []):
+            if v["start"] <= t < v["end"]:
+                img = apply_vfx(v, t, img, lambda: nearest_mask(work, idx, box), work)
         ov = work / "overlay" / f"f{i:05d}.png"
         if ov.exists():
             img = Image.alpha_composite(img, Image.open(ov).convert("RGBA"))
@@ -711,7 +832,7 @@ def cmd_encode(work, name):
     ff("-i", hq, "-vf", "scale=720:1280,format=yuv420p", "-c:v", "libx264", "-crf", 28, "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", phone)
     srt = OUTPUT / f"{name}.srt"
     write_srt(work, srt)
-    rep = {"hq": str(hq), "phone": str(phone), "srt": str(srt), "check": check(hq), "input_unchanged": sha256(info["input"]) == info["input_sha256"]}
+    rep = {"hq": str(hq), "phone": str(phone), "srt": str(srt), "check": check(hq), "input_unchanged": sha256(src_input(info)) == info["input_sha256"]}
     contact_sheet(hq, work / "sheet.png")
     rep_dur = float(ffprobe_json(hq)["format"]["duration"])
     rep["sheet"] = str(work / "sheet.png")
@@ -754,7 +875,7 @@ def main():
     elif c == "overlay":
         cmd_overlay(Path(a[1]))
     elif c == "masks":
-        cmd_masks(a[1])
+        cmd_masks(a[1], int(a[a.index("--step") + 1]) if "--step" in a else 1)
     elif c == "compose":
         cmd_compose(a[1])
     elif c == "sfx":

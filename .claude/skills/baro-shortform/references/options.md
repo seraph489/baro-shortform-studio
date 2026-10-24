@@ -61,3 +61,33 @@
 | 소리 | `sfx[]`에 `01_사진등장_뽁` −12dB를 카드마다 |
 | 규칙 | 사진은 작업 폴더 `photos/`에 메타데이터 지워 복사. **얼굴·이름이 보이는 사진 금지.** 원장님이 준 구내 사진은 **게시 전 환자 동의 확인**. 웹 사진은 라이선스·출처 기록 |
 | 자막 | 카드가 자막 자리(y 1100~1490)를 차지하니 그 구간은 자막 대신 제목 한 줄 |
+
+## 9. 레퍼런스 효과 15가지 (`fx[]` 그래픽 · `vfx[]` 영상) — 선택 (2026-10-24 설치)
+이름은 [effects-catalog.md](effects-catalog.md)의 레퍼런스 표기. **한 영상에 새 효과는 1~2개**, 내용에 맞을 때만. 자료가 필요하면 추천할 때 먼저 요청 ([recommend.md](recommend.md) 2-1).
+시험 영상: `output/fx_test/fx_test_all15_v1_hq.mp4` (ep06 영상에 15개를 차례로).
+
+### 그래픽 효과 `fx[]` — 각 항목 `{type, start, end, ...}`
+| type | 효과 (레퍼런스 이름) | 언제 | 필요한 자료 | 주요 값 |
+|---|---|---|---|---|
+| `ui_card` | UI world / Apple UI key cards | 단계·확인 항목을 앱 화면처럼 | — | `title`, `rows:[{icon, label, value}]`(icon: check·tooth·calendar·clock·chat·file·star·info), `step`, `top` |
+| `phone` | Phone mockup | 예약·상담 방법 안내 | 직접 만든 화면 캡처(선택) | `src` 또는 `lines:[...]`(말풍선), `side` left/right |
+| `freebie` | Freebie doc | 마무리에 나눠 줄 자료 | **실제 자료 제목** | `badge`, `title`, `sub` |
+| `orbit` | Orbit | 도입 훅, 사례 나열 | 장치·모형 사진 2~4장 | `srcs`, `period`, `center`, `rx`, `ry` |
+| `headline_wall` | Headline wall | "흔한 오해들" 나열 | — (가짜 기사 금지, 질문·통념 문장만) | `items`(최대 6), `step` |
+| `chart` | Chart grow / Velocity graph | 기간·비율 비교 | **병원 확정 수치 + 출처** | `title`, `data:[{label, value}]`, `unit`, `source` |
+| `iris` | Iris effect | 시작·끝 전환 | — | `mode` open/close, `dur`, `center` |
+| `paper_cut` | Paper cut | 가벼운 주제, 아이 교정 | — | `stickers:[{text, x, y, rotate}]`, `step` |
+| `cursor` | Cursor tracker | 화면 녹화·폰 목업 위 클릭 안내 | 화면 녹화(선택) | `path:[[초, x, y]...]`, `clicks:[초]` |
+| `couch_wall` | Couch wall | 진료실 벽에 사진 액자 | 사진 + 삼각대 촬영 | `frames:[{src, x, y, w, h, rotate}]` |
+
+### 영상 효과 `vfx[]`
+| type | 효과 | 언제 | 조건 | 주요 값 |
+|---|---|---|---|---|
+| `pull_back` | Pull-back reveal | 마무리 "전체 보기" | — | `to`(작아질 크기, 0.68), `y` |
+| `green_screen` | Green screen | 짧은 구간 배경 바꾸기 | **사람 마스크** | `bg`: 색(`#DDEBE7`) 또는 사진 경로 |
+| `frame_break` | Frame break | 반전·결론 직전 | **사람 마스크**, 삼각대 | `scale`, `cut`(액자 윗변 위치) |
+| `doodle` | Doodle boil | 아이·청소년, 부드러운 분위기 | **사람 마스크** | `color`, `width`, `boil` |
+| `pixelate` | Pixelated close up | 화면 녹화의 한 부분 확대 | 화면 녹화가 있을 때 의미 있음 | `box:[x,y,w,h]`, `block` |
+
+- 사람 마스크: `pipeline.py masks work/<작업> --step 3` (3프레임마다 만들고 가까운 것을 씀, CPU 프레임당 약 40초 → 1.4초 구간 하나에 약 10분). 백그라운드로.
+- 촬영이 필요한 5개(Zoom-through cut, Match cut, Over the shoulder, Product demo, Vertigo)는 코드로 대신하지 않음 — 촬영본이 생기면 추가.

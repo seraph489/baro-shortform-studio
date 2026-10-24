@@ -109,6 +109,43 @@
   #cta .kk { position:absolute; left:0; right:0; top:62px; text-align:center; font-size:142px; font-weight:900; letter-spacing:-4px; color:var(--coral-soft); }
   #cta .kk span { display:inline-block; transform-origin:50% 60%; }
   #cta .t { position:absolute; left:420px; top:232px; font-size:52px; font-weight:500; white-space:pre; }
+  /* 레퍼런스 효과 (plan.fx[]) */
+  .fx { position:absolute; display:none; }
+  .ui { left:190px; width:700px; background:rgba(248,248,250,.97); border-radius:34px; padding:22px 26px 10px; box-shadow:0 18px 40px rgba(0,0,0,.35); }
+  .ui .uh { font:800 40px/1.2 "Pretendard"; color:#1E2A5A; padding:4px 6px 14px; }
+  .ui .ur { display:flex; align-items:center; gap:20px; padding:16px 6px; border-top:2px solid #e6e6ea; font:700 40px/1 "Pretendard"; color:#1E2A5A; }
+  .ui .ur i { width:62px; height:62px; border-radius:16px; background:#b9c0c8; display:flex; align-items:center; justify-content:center; }
+  .ui .ur.on i { background:var(--teal, #1F6F64); }
+  .ui .ur b { margin-left:auto; color:#8a8f98; font-weight:600; }
+  .phone { width:260px; height:540px; border-radius:52px; background:#111; padding:16px; box-shadow:0 20px 50px rgba(0,0,0,.45); }
+  .phone .notch { position:absolute; left:90px; top:22px; width:80px; height:20px; border-radius:10px; background:#000; z-index:2; }
+  .phone .scr { width:100%; height:100%; border-radius:38px; overflow:hidden; background:#f3f4f6; }
+  .phone .scr img { width:100%; height:100%; object-fit:cover; }
+  .phone .pl { padding:70px 18px; }
+  .phone .pl p { margin:0 0 16px; padding:14px 18px; background:#fff; border-radius:20px; font:600 26px/1.3 "Pretendard"; color:#1E2A5A; max-width:80%; }
+  .phone .pl p.me { margin-left:auto; background:var(--teal, #1F6F64); color:#fff; }
+  .freebie { left:280px; width:520px; background:#fff; border-radius:24px; padding:36px 40px; box-shadow:0 22px 48px rgba(0,0,0,.4); border-top:18px solid var(--coral, #F26B5B); }
+  .freebie .fb-b { display:inline-block; margin:14px 0 12px; padding:8px 16px; border-radius:30px; background:#FDECE9; color:var(--coral, #F26B5B); font:800 28px/1 "Pretendard"; }
+  .freebie .fb-t { font:900 54px/1.2 "Pretendard"; color:#1E2A5A; letter-spacing:-.02em; }
+  .freebie .fb-s { margin-top:14px; font:600 30px/1.3 "Pretendard"; color:#6b7280; }
+  .orb { width:180px; height:180px; border-radius:50%; overflow:hidden; border:6px solid #fff; box-shadow:0 10px 28px rgba(0,0,0,.4); }
+  .orb img { width:100%; height:100%; object-fit:cover; }
+  .hw { max-width:380px; padding:20px 24px; background:#fff; border-radius:10px; font:800 38px/1.25 "Pretendard"; color:#1E2A5A; box-shadow:0 12px 28px rgba(0,0,0,.35); border-left:10px solid var(--coral, #F26B5B); }
+  .hw .k, .paper .k { color:var(--coral, #F26B5B); }
+  .chart { left:140px; width:800px; background:rgba(255,255,255,.96); border-radius:30px; padding:26px 34px 18px; box-shadow:0 18px 40px rgba(0,0,0,.35); }
+  .chart .ch-t { font:800 40px/1.2 "Pretendard"; color:#1E2A5A; }
+  .chart .bars { display:flex; align-items:flex-end; justify-content:space-around; height:320px; }
+  .chart .bar { display:flex; flex-direction:column; align-items:center; gap:10px; font:700 30px/1 "Pretendard"; color:#1E2A5A; }
+  .chart .bar i { display:block; width:110px; height:0; border-radius:16px 16px 4px 4px; background:var(--teal, #1F6F64); }
+  .chart .bar:last-child i { background:var(--coral, #F26B5B); }
+  .chart .ch-s { margin-top:12px; font:500 22px/1 "Pretendard"; color:#8a8f98; text-align:right; }
+  .iris { inset:0; }
+  .paper { padding:22px 30px 22px 26px; background:#FFF9EC; font:800 44px/1.2 "Pretendard"; color:#1E2A5A; box-shadow:0 8px 18px rgba(0,0,0,.3); clip-path:polygon(0 4%, 6% 0, 14% 5%, 25% 1%, 38% 4%, 52% 0, 66% 5%, 79% 1%, 92% 4%, 100% 0, 99% 50%, 100% 96%, 88% 100%, 74% 95%, 60% 100%, 46% 96%, 32% 100%, 18% 95%, 6% 100%, 0 95%, 2% 50%); }
+  .paper em { display:inline-flex; width:56px; height:56px; margin-right:14px; border-radius:50%; background:var(--coral, #F26B5B); color:#fff; font:900 34px/56px "Pretendard"; justify-content:center; font-style:normal; vertical-align:middle; }
+  .cursor { z-index:5; filter:drop-shadow(0 4px 8px rgba(0,0,0,.4)); }
+  .ring { width:120px; height:120px; border-radius:50%; border:6px solid #fff; z-index:4; }
+  .wallf { border:12px solid #2a2118; outline:4px solid #c9a96e; box-shadow:0 14px 30px rgba(0,0,0,.5); background:#000; }
+  .wallf img { width:100%; height:100%; object-fit:cover; }
 </style>
 </head>
 <body>
@@ -295,6 +332,7 @@ function textBoxes() {   // 글자 요소의 실제 글자 영역 (겹침 계산
   if (visible(cta)) { const r = [...cta.children].map((c) => c.getBoundingClientRect()).filter((r) => r.height); out.push({ name: "마무리", el: cta, box: { top: Math.min(...r.map((x) => x.top)), bottom: Math.max(...r.map((x) => x.bottom)), left: Math.min(...r.map((x) => x.left)), right: Math.max(...r.map((x) => x.right)) } }); }
   const box = document.querySelector("#panel .box"); if (visible(document.getElementById("panel"))) out.push({ name: "패널", el: box, box: box.getBoundingClientRect() });
   document.querySelectorAll(".inset, .hand, .photo").forEach((e) => visible(e) && out.push({ name: e.className, el: e, box: e.getBoundingClientRect() }));
+  document.querySelectorAll(".fxbox").forEach((e) => visible(e) && out.push({ name: e.dataset.name, el: e, box: e.getBoundingClientRect() }));
   const kw = document.getElementById("kw"); if (visible(kw)) out.push({ name: "핵심어", el: kw, box: document.getElementById("kwText").getBoundingClientRect() });
   const ch = document.getElementById("chat"); if (visible(ch)) out.push({ name: "말풍선", el: ch, box: ch.querySelector(".bub").getBoundingClientRect() });
   const ti = document.getElementById("title"); if (visible(ti)) out.push({ name: "제목", el: ti, box: { top: ti.firstChild.getBoundingClientRect().top, bottom: ti.lastChild.getBoundingClientRect().bottom, left: 0, right: 1080 } });
@@ -315,6 +353,91 @@ function avoidFollow() {
     }
   }
 }
+// ── 레퍼런스 효과 (plan.fx[]) — references/effects-catalog.md. 효과마다 {type, start, end, ...}
+const FXI = {   // Tabler Icons (MIT) 일부
+  check: '<path d="M5 12l5 5l10 -10"/>',
+  tooth: '<path d="M12 5.5c-1.074 -.586 -2.583 -1.5 -4 -1.5c-2.1 0 -4 1.247 -4 5c0 4.899 1.056 8.41 2.671 10.537c.573 .756 1.97 .521 2.567 -.236c.398 -.505 .819 -1.439 1.262 -2.801c.292 -.771 .892 -1.504 1.5 -1.5c.602 0 1.21 .737 1.5 1.5c.443 1.362 .864 2.295 1.262 2.8c.597 .759 2 .993 2.567 .237c1.615 -2.127 2.671 -5.637 2.671 -10.537c0 -3.74 -1.908 -5 -4 -5c-1.423 0 -2.92 .911 -4 1.5z"/><path d="M12 5.5l3 1.5"/>',
+  calendar: '<path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M4 11h16"/>',
+  clock: '<path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 7v5l3 3"/>',
+  chat: '<path d="M3 20l1.3 -3.9c-2.324 -3.437 -1.426 -7.872 2.1 -10.374c3.526 -2.501 8.59 -2.296 11.845 .48c3.255 2.777 3.695 7.266 1.029 10.501c-2.666 3.235 -7.615 4.215 -11.574 2.293l-4.7 1"/>',
+  file: '<path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"/><path d="M9 9l1 0"/><path d="M9 13l6 0"/><path d="M9 17l6 0"/>',
+  star: '<path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z"/>',
+  info: '<path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/>',
+};
+const ico = (n, s = 44, c = "currentColor") => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${FXI[n] || FXI.info}</svg>`;
+const ease = (k) => 1 - Math.pow(1 - Math.max(0, Math.min(1, k)), 3);
+const fade = (x, t, a = 0.2) => Math.max(0, Math.min(1, (t - x.start) / a, (x.end - t) / a));
+const mk = (cls, html, name) => { const d = document.createElement("div"); d.className = "fx " + cls + (name ? " fxbox" : ""); if (name) d.dataset.name = name; d.innerHTML = html; document.body.appendChild(d); return d; };
+const FX = (P.fx || []).map((x) => {
+  const f = { ...x, parts: [] };
+  if (x.type === "ui_card") {   // UI 카드: 설정 앱 같은 목록 카드, 줄이 차례로 켜짐
+    f.el = mk("ui", `<div class="uh">${esc(x.title || "")}</div>` + (x.rows || []).map((r) => `<div class="ur"><i>${ico(r.icon || "check", 40, "#fff")}</i><span>${esc(r.label)}</span><b>${esc(r.value || "")}</b></div>`).join(""), "UI 카드");
+    f.el.style.top = (x.top ?? 1060) + "px"; f.parts = [...f.el.querySelectorAll(".ur")];
+  } else if (x.type === "phone") {   // 폰 목업: 옆에 휴대폰 화면 (직접 만든 화면·사진만)
+    const scr = x.src ? `<img src="${x.src}">` : `<div class="pl">${(x.lines || []).map((l, i) => `<p class="${i % 2 ? "me" : ""}">${esc(l)}</p>`).join("")}</div>`;
+    f.el = mk("phone", `<div class="notch"></div><div class="scr">${scr}</div>`, "폰 목업");
+    f.el.style.left = (x.side === "left" ? 80 : 740) + "px"; f.el.style.top = (x.top ?? 820) + "px";   // 얼굴(x 340~775) 옆 f.parts = [...f.el.querySelectorAll(".pl p")];
+  } else if (x.type === "freebie") {   // 자료 표지 카드: "상담 전 체크리스트" 같은 문서 표지
+    f.el = mk("freebie", `<div class="fb-ic">${ico("file", 84, "#1E2A5A")}</div><div class="fb-b">${esc(x.badge || "무료 자료")}</div><div class="fb-t">${fmt(x.title || "")}</div><div class="fb-s">${esc(x.sub || "")}</div>`, "자료 카드");
+    f.el.style.top = (x.top ?? 1040) + "px";
+  } else if (x.type === "orbit") {   // 궤도: 사진이 머리 위를 타원으로 돎
+    f.parts = (x.srcs || []).map((s) => mk("orb", `<img src="${s}">`));
+  } else if (x.type === "headline_wall") {   // 헤드라인 벽: 제목 카드가 흩어져 붙음 (가짜 기사 금지 — 질문·통념 문장만)
+    const pos = [[70, 300, -5], [610, 270, 4], [60, 560, 3], [640, 600, -4], [120, 1180, -3], [600, 1230, 5]];
+    f.parts = (x.items || []).slice(0, 6).map((s, i) => { const d = mk("hw", fmt(s), "헤드라인 " + (i + 1)); d.style.left = pos[i][0] + "px"; d.style.top = pos[i][1] + "px"; d.dataset.r = pos[i][2]; return d; });
+  } else if (x.type === "chart") {   // 차트: 막대가 자람 (병원 확정 수치만, 출처 표시)
+    const mx = Math.max(...x.data.map((d) => d.value));
+    f.el = mk("chart", `<div class="ch-t">${esc(x.title || "")}</div><div class="bars">${x.data.map((d) => `<div class="bar"><b>${esc(d.value + (x.unit || ""))}</b><i data-h="${(d.value / mx) * 230}"></i><span>${esc(d.label)}</span></div>`).join("")}</div><div class="ch-s">${esc(x.source || "")}</div>`, "차트");
+    f.el.style.top = (x.top ?? 1040) + "px"; f.parts = [...f.el.querySelectorAll(".bar i")];
+  } else if (x.type === "iris") {   // 원형 열림·닫힘 전환
+    f.el = mk("iris", "");
+  } else if (x.type === "paper_cut") {   // 종이 콜라주: 오려 붙인 종이 + 번호 스티커
+    f.parts = (x.stickers || []).map((s, i) => { const d = mk("paper", `<em>${i + 1}</em>${fmt(s.text)}`, "종이 " + (i + 1)); d.style.left = s.x + "px"; d.style.top = s.y + "px"; d.dataset.r = s.rotate ?? (i % 2 ? 4 : -4); return d; });
+  } else if (x.type === "cursor") {   // 커서 추적: 화면 위 포인터가 움직이고 클릭 물결
+    f.el = mk("cursor", `<svg width="70" height="70" viewBox="0 0 24 24"><path d="M7.904 17.563a1.2 1.2 0 0 0 2.228 .308l2.09 -3.093l4.907 4.907a1.067 1.067 0 0 0 1.509 0l1.047 -1.047a1.067 1.067 0 0 0 0 -1.509l-4.907 -4.907l3.113 -2.09a1.2 1.2 0 0 0 -.309 -2.228l-13.582 -3.904l3.904 13.563z" fill="#fff" stroke="#1E2A5A" stroke-width="1.5"/></svg>`);
+    f.ring = mk("ring", "");
+  } else if (x.type === "couch_wall") {   // 벽 액자: 배경 벽에 사진 액자가 붙음
+    f.parts = (x.frames || []).map((r) => { const d = mk("wallf", `<img src="${r.src}">`); Object.assign(d.style, { left: r.x + "px", top: r.y + "px", width: r.w + "px", height: r.h + "px" }); d.dataset.r = r.rotate ?? 0; return d; });
+  }
+  return f;
+});
+function drawFx(t) {
+  for (const f of FX) {
+    const on = t >= f.start && t < f.end, d = t - f.start, a = fade(f, t);
+    const show = (el, v) => (el.style.display = v ? "block" : "none");
+    if (f.el) show(f.el, on); f.parts.forEach((p) => p.classList.contains("fx") && show(p, on)); if (f.ring) show(f.ring, on);   // 카드 안 줄·막대는 카드와 같이 보임
+    if (!on) continue;
+    if (f.type === "ui_card" || f.type === "freebie" || f.type === "chart") {
+      f.el.style.opacity = a; f.el.style.transform = `translateY(${(1 - ease(d / 0.35)) * 120}px) rotate(${f.type === "freebie" ? -3 * ease(d / 0.35) : 0}deg)`;
+      if (f.type === "ui_card") f.parts.forEach((p, i) => { const k = ease((d - 0.25 - i * (f.step ?? 0.35)) / 0.25); p.style.opacity = 0.25 + 0.75 * k; p.classList.toggle("on", k > 0.5); });
+      if (f.type === "chart") f.parts.forEach((p, i) => (p.style.height = p.dataset.h * ease((d - 0.3 - i * 0.15) / 0.6) + "px"));
+    } else if (f.type === "phone") {
+      f.el.style.opacity = a; f.el.style.transform = `translateY(${(1 - ease(d / 0.45)) * 900}px) rotate(${(f.side === "left" ? -1 : 1) * 4}deg)`;
+      f.parts.forEach((p, i) => (p.style.opacity = d > 0.5 + i * 0.5 ? 1 : 0));
+    } else if (f.type === "orbit") {
+      const [cx, cy] = f.center || [540, 330], rx = f.rx ?? 400, ry = f.ry ?? 90, n = f.parts.length;
+      f.parts.forEach((p, i) => { const th = (d / (f.period ?? 4)) * 2 * Math.PI + (i / n) * 2 * Math.PI, z = Math.sin(th);
+        p.style.left = cx + rx * Math.cos(th) - 90 + "px"; p.style.top = cy + ry * z - 90 + "px"; p.style.transform = `scale(${0.75 + 0.25 * (z + 1) / 2})`; p.style.zIndex = z > 0 ? 3 : 1; p.style.opacity = a * (0.6 + 0.4 * (z + 1) / 2); });
+    } else if (f.type === "headline_wall" || f.type === "paper_cut") {
+      f.parts.forEach((p, i) => { const k = d - i * (f.step ?? 0.25); p.style.display = k >= 0 ? "block" : "none"; p.style.opacity = a; p.style.transform = `rotate(${p.dataset.r}deg) scale(${lerp([[0, 1.6], [0.12, 0.94], [0.2, 1]], k)})`; });
+    } else if (f.type === "iris") {   // mode open: 검은 화면에서 원이 커지며 열림 / close: 반대
+      const k = ease(d / (f.dur ?? 0.6)), r = f.mode === "close" ? (f.min ?? 150) + (1250 - (f.min ?? 150)) * (1 - k) : k * 1250,   // 닫힘은 얼굴 둘레 원에서 멈춤 (완전 검은 화면은 Reels 검사 실패)
+         [cx, cy] = f.center || [540, 760];
+      f.el.style.background = `radial-gradient(circle at ${cx}px ${cy}px, transparent ${r}px, #0b0f14 ${r + 2}px)`;
+    } else if (f.type === "cursor") {
+      const pts = f.path || [[0, 700, 1300], [1, 540, 1000]];
+      let x = pts[0][1], y = pts[0][2];
+      for (let i = 1; i < pts.length; i++) if (d >= pts[i - 1][0]) { const k = ease((d - pts[i - 1][0]) / (pts[i][0] - pts[i - 1][0])); x = pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * k; y = pts[i - 1][2] + (pts[i][2] - pts[i - 1][2]) * k; }
+      f.el.style.left = x - 12 + "px"; f.el.style.top = y - 8 + "px"; f.el.style.opacity = a;
+      const c = (f.clicks || []).filter((c) => d >= c && d < c + 0.5).pop();
+      f.ring.style.display = c != null ? "block" : "none";
+      if (c != null) { const k = (d - c) / 0.5; f.ring.style.left = x - 60 + "px"; f.ring.style.top = y - 60 + "px"; f.ring.style.transform = `scale(${0.3 + k})`; f.ring.style.opacity = 1 - k; }
+    } else if (f.type === "couch_wall") {
+      f.parts.forEach((p, i) => { const k = ease((d - i * 0.2) / 0.35); p.style.opacity = a * k; p.style.transform = `rotate(${p.dataset.r}deg) scale(${0.85 + 0.15 * k})`; });
+    }
+  }
+}
+
 // 렌더러가 프레임마다 겹침을 검사할 때 쓰는 함수
 window.__overlaps = () => {
   const bs = textBoxes(), fo = document.getElementById("follow");
@@ -328,7 +451,7 @@ window.__overlaps = () => {
   return hits;
 };
 const _renderAt = window.renderAt;
-window.renderAt = (t) => { _renderAt(t); avoidFollow(); };
+window.renderAt = (t) => { _renderAt(t); if (LAYER !== "kw") drawFx(t); avoidFollow(); };
 window.renderAt(0);
 </script>
 </body>
