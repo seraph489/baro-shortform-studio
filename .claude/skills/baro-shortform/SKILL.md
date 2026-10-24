@@ -88,7 +88,7 @@ $PY -I .claude/skills/baro-shortform/scripts/editor_server.py work/<작업> 8765
 ## 5. 보고와 최종 업로드본
 
 보고는 짧게: 결과 파일(고화질·폰용·SRT), 길이, 음량, 규격 검사 결과 / 원장님이 확인할 것(자막에서 뺀 말, 의료 표현, 화면 속 개인정보) / 확인하지 못한 것. 원장님이 최종본을 고르면:
-1. **최종 표시 파일명:** 그 버전의 세 파일(`_hq.mp4`·`_phone.mp4`·`.srt`) 이름 앞에 `FINAL_`을 붙인다 (`mv -n`, 예: `output/ep05/FINAL_ep05_extraction_01_v1_hq.mp4`). 시리즈 폴더에서 이름순 맨 위에 오고, `FINAL_`은 폴더마다 한 세트만 둔다. 확정본을 바꾸면 이전 `FINAL_`을 떼고 새 버전에 붙인다. 다른 후보 파일은 이름 그대로 둔다(원장님이 직접 붙인 표시도 건드리지 않는다).
+1. **최종 표시 파일명 + 최종 폴더:** 그 버전의 세 파일(`_hq.mp4`·`_phone.mp4`·`.srt`) 이름 앞에 `FINAL_`을 붙여 **`output/FINAL/`로 옮긴다** (`mv -n`, 예: `output/FINAL/FINAL_ep06_clear-aligner_photo_v2_hq.mp4`). `output/FINAL/`에는 확정본만 두고, 편마다 한 세트만. 확정본을 바꾸면 이전 세트는 `FINAL_`을 떼고 원래 시리즈 폴더(`output/<epXX>/`)로 돌려놓은 뒤 새 버전을 옮긴다. 다른 후보 파일은 시리즈 폴더에 이름 그대로 둔다(원장님이 직접 붙인 표시도 건드리지 않는다).
 2. `work/<작업>/DECISION.md`에 확정 버전·파일 경로·길이·음량·구성·비교 후보를 기록한다.
 
 게시는 원장님이 직접 한다.
@@ -100,8 +100,8 @@ $PY -I .claude/skills/baro-shortform/scripts/editor_server.py work/<작업> 8765
 - 옛 plan.json의 `"style": "06"`은 02로, `"07"`·`"03"`은 01로 자동으로 읽는다
 
 ## 참고 결과물
-- 01 + 장치 비교 조합 확정본: `output/ep06/FINAL_ep06_clear-aligner_photo_v2_hq.mp4` (ep06, 말풍선·사진 카드·뒤로 빠지기·팝)
-- 01 확정본: `output/ep05/FINAL_ep05_extraction_01_v1_hq.mp4` (ep05, 말풍선·손글씨·패널), `output/ep04/FINAL_ep04_adult-age_01_v4_hq.mp4` (ep04, 말풍선·팔로우 카드), `output/ep03/FINAL_ep03_kids-timing_01_v3_hq.mp4` (ep03), `output/test-02/test02_age_v4c_sfx_hq.mp4` (test-02)
+- 01 + 장치 비교 조합 확정본: `output/FINAL/FINAL_ep06_clear-aligner_photo_v2_hq.mp4` (ep06, 말풍선·사진 카드·뒤로 빠지기·팝)
+- 01 확정본: `output/FINAL/FINAL_ep05_extraction_01_v1_hq.mp4` (ep05, 말풍선·손글씨·패널), `output/FINAL/FINAL_ep04_adult-age_01_v4_hq.mp4` (ep04, 말풍선·팔로우 카드), `output/FINAL/FINAL_ep03_kids-timing_01_v3_hq.mp4` (ep03), `output/test-02/test02_age_v4c_sfx_hq.mp4` (test-02)
 - 01 + 손글씨: `output/ep03/ep03_kids-timing_07_v2_hq.mp4` · 02: `output/ep04/ep04_adult-age_06_v3_hq.mp4`
 - 효과 이름 통합 목록: [references/effects-catalog.md](references/effects-catalog.md)
 - 효과 아이디어: [references/sources/effects-15_분류.md](references/sources/effects-15_분류.md) (만들 수 있는 것 분류 + 받아 둔 오픈소스), [effects-17.md](references/sources/effects-17.md)
