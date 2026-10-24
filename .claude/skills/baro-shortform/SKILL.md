@@ -100,7 +100,7 @@ $PY -I .claude/skills/baro-shortform/scripts/editor_server.py work/<작업> 8765
 - 옛 plan.json의 `"style": "06"`은 02로, `"07"`·`"03"`은 01로 자동으로 읽는다
 
 ## 참고 결과물
-- 01 + 사진 카드 확정본: `output/ep06/FINAL_ep06_clear-aligner_photo_v1_hq.mp4` (ep06, 장치 사진 비교)
+- 01 + 장치 비교 조합 확정본: `output/ep06/FINAL_ep06_clear-aligner_photo_v2_hq.mp4` (ep06, 말풍선·사진 카드·뒤로 빠지기·팝)
 - 01 확정본: `output/ep05/FINAL_ep05_extraction_01_v1_hq.mp4` (ep05, 말풍선·손글씨·패널), `output/ep04/FINAL_ep04_adult-age_01_v4_hq.mp4` (ep04, 말풍선·팔로우 카드), `output/ep03/FINAL_ep03_kids-timing_01_v3_hq.mp4` (ep03), `output/test-02/test02_age_v4c_sfx_hq.mp4` (test-02)
 - 01 + 손글씨: `output/ep03/ep03_kids-timing_07_v2_hq.mp4` · 02: `output/ep04/ep04_adult-age_06_v3_hq.mp4`
 - 효과 이름 통합 목록: [references/effects-catalog.md](references/effects-catalog.md)
