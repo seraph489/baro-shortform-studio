@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>바로 숏폼 그래픽 레이어</title>
+<!-- 바로 숏폼 공통 그래픽 레이어 (스타일 01·02 공용). 제목·자막·한두 단어 자막·핵심어(팝/손글씨/사람 뒤)·기준 패널·마무리 3단·팔로우 카드·인셋을 plan.json으로 켜고 끈다. plan.json(출력 시각 기준)을 window.PLAN 으로 받아 renderAt(t)로 그린다.
+     인물 영상은 여기 없다: 투명 PNG로 캡처해 compose 단계에서 인물 위에 얹는다. -->
+<style>
+  @font-face { font-family: "BaroHand"; src: url("__HAND_FONT_URL__") format("truetype"); font-display: block; }
+  @font-face { font-family: "Pretendard"; src: url("__FONT_URL__") format("woff2"); font-weight: 45 920; font-display: block; }
+  :root { --teal:#0F5C5A; --coral:#F2795B; --coral-soft:#FFB39F; --ivory:#F6F1E8; --ink:#1D2B2A; --shadow:0 3px 6px rgba(0,0,0,.6); }
+  * { margin:0; box-sizing:border-box; }
+  html, body { width:1080px; height:1920px; background:transparent; overflow:hidden; font-family:"Pretendard", sans-serif; color:#fff; }
+  .ev { position:absolute; left:40px; right:40px; top:1190px; display:none; text-align:center; text-shadow:var(--shadow); }
+  .ev .w { display:inline-block; transform-origin:50% 60%; }
+  .ch { display:inline-block; }
+  .body   { font-size:56px; font-weight:500; line-height:1.3; letter-spacing:-.5px; }
+  .impact { font-size:104px; font-weight:700; line-height:1.15; letter-spacing:-2.5px; }
+  .ev small { font-size:.62em; font-weight:500; }
+  .k { color:var(--coral-soft); font-weight:800; }
+
+  /* 배경이 복잡하면 글자 테두리 (자막 위치 가이드) */
+  body.outline .ev, body.outline .title, body.outline #kw, body.outline #cta { paint-order: stroke fill; -webkit-text-stroke: 9px rgba(0,0,0,.85); }
+  body.outline .badge { -webkit-text-stroke: 0; }
+
+  /* 07: 손글씨 draw-in — 글자마다 마스크가 왼쪽→오른쪽으로 열리며 써지는 느낌 */
+  .hand { position:absolute; display:none; font-family:"BaroHand", cursive; line-height:1.0; white-space:nowrap; transform-origin:50% 50%; }
+  .hand .hc { display:inline-block; -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; }
+  .hand.navy { color:#1E2A5A; text-shadow:0 0 18px rgba(255,255,255,.55); }
+  .hand.white { color:#fff; text-shadow:0 4px 16px rgba(0,0,0,.5); }
+  .hand.coral { color:var(--coral); text-shadow:0 0 16px rgba(255,255,255,.5); }
+  /* 07: 머리 위 자막 (subs_layout: "top") */
+  body.subs-top .ev { top:250px; font-size:46px; font-weight:600; letter-spacing:-.5px; }
+  body.subs-top .ev .k { font-weight:800; }
+  body.subs-top.subs-navy .ev { color:#1E2A5A; text-shadow:0 0 14px rgba(255,255,255,.6); }
+  body.subs-top.subs-navy .ev .k { color:#D9532F; }
+
+  /* 옵션: 시청자 질문 말풍선 (Chat drop) — 위에서 떨어져 살짝 튕기며 멈춤. 아이콘: Tabler Icons(MIT) */
+  #chat { position:absolute; left:120px; right:120px; top:250px; display:none; }
+  #chat .bub { position:relative; background:#fff; color:#1D2B2A; border-radius:36px; padding:26px 34px 30px 34px; box-shadow:0 14px 36px rgba(0,0,0,.35); }
+  #chat .bub::after { content:""; position:absolute; left:70px; bottom:-22px; border:22px solid transparent; border-top-color:#fff; border-bottom:0; border-left:0; }
+  #chat .who { display:flex; align-items:center; gap:14px; font-size:28px; font-weight:700; color:#5F6B72; margin-bottom:10px; }
+  #chat .who i { width:50px; height:50px; border-radius:50%; background:#E7ECEF; display:flex; align-items:center; justify-content:center; color:#8A969D; }
+  #chat .who i svg { width:32px; height:32px; }
+  #chat .who .tag { margin-left:auto; color:var(--teal); display:flex; align-items:center; gap:6px; font-size:26px; }
+  #chat .who .tag svg { width:30px; height:30px; }
+  #chat .q { font-size:52px; font-weight:800; line-height:1.22; letter-spacing:-1.2px; }
+  #chat .q em { font-style:normal; color:var(--coral); }
+
+  /* 06: 위쪽 후킹 헤드라인 (첫 몇 초 고정, 위 띠 12% 아래) */
+  #headline { position:absolute; left:120px; right:120px; top:250px; text-align:center; display:none; font-size:68px; font-weight:900; line-height:1.12; letter-spacing:-1.5px;
+    color:#fff; paint-order:stroke fill; -webkit-text-stroke:10px rgba(0,0,0,.75); text-shadow:0 4px 14px rgba(0,0,0,.45); }
+  #headline .k { color:var(--coral-soft); } #headline .m { color:#7FE0D3; } #headline .x { color:#C9CDD1; text-decoration:line-through; text-decoration-thickness:6px; }
+  /* 06: 한두 단어 큰 자막 */
+  .ev.word { font-size:84px; font-weight:900; letter-spacing:-1px; line-height:1.1; paint-order:stroke fill; -webkit-text-stroke:10px rgba(0,0,0,.7); text-shadow:0 4px 12px rgba(0,0,0,.45); }
+  .ev.word .k { color:var(--coral-soft); }
+  /* 06: 사진 인셋 (자막 아래, 안전구역 아래 끝 y1500 위) */
+  .inset { position:absolute; left:220px; width:640px; top:1300px; height:200px; border-radius:26px; overflow:hidden; display:none; box-shadow:0 10px 30px rgba(0,0,0,.4); border:4px solid #fff; background:#222; }
+  .inset img { width:100%; height:100%; object-fit:cover; display:block; }
+  /* 사진 카드 (photos[]): 장치 사진 + 이름표, 옆에서 날아와 붙음. 환자 얼굴·이름 금지 */
+  .photo { position:absolute; width:390px; display:none; background:#fff; border-radius:28px; padding:14px 14px 0; box-shadow:0 14px 36px rgba(0,0,0,.35); transform-origin:50% 50%; }
+  .photo img { width:100%; height:290px; object-fit:cover; display:block; border-radius:18px; }
+  .photo .lb { font:800 44px/1 "Pretendard"; color:#1E2A5A; text-align:center; padding:18px 0 20px; letter-spacing:-.02em; }
+  #phead { position:absolute; left:0; right:0; top:985px; text-align:center; display:none; font:800 50px/1.2 "Pretendard"; color:#fff; text-shadow:0 3px 14px rgba(0,0,0,.6); letter-spacing:-.02em; }
+  #phead b { color:var(--coral); }
+  .photo .tg { font:700 30px/1 "Pretendard"; color:var(--coral); text-align:center; margin:-8px 0 0; padding:0 0 20px; }
+  /* 06: 팔로우 카드 */
+  #follow { position:absolute; left:50%; top:1400px; transform:translateX(-50%); display:none; align-items:center; gap:14px; background:#fff; color:#1D2B2A; border-radius:999px; padding:12px 18px 12px 12px; font-size:34px; font-weight:700; box-shadow:0 8px 24px rgba(0,0,0,.35); white-space:nowrap; }
+  #follow i { width:56px; height:56px; border-radius:50%; background:conic-gradient(var(--coral), #7FE0D3, var(--teal), var(--coral)); display:inline-block; }
+  #follow .ft { display:flex; flex-direction:column; line-height:1.15; }
+  #follow small { font-size:24px; font-weight:500; color:#5F6B72; margin-top:4px; }
+  #follow small:empty { display:none; }
+  #follow b { background:#ECEFF1; color:#555; font-size:26px; padding:8px 16px; border-radius:12px; font-weight:700; }
+
+  /* 제목 + 배지: 가슴 위치, 첫 대사 전까지 */
+  #title { top:1110px; }
+  .badge { display:inline-block; background:var(--teal); font-size:44px; font-weight:800; padding:12px 26px; border-radius:28px; text-shadow:none; box-shadow:0 4px 14px rgba(0,0,0,.35); transform:skewX(-10deg); margin-bottom:18px; }
+  .title { font-size:118px; font-weight:900; line-height:1.0; letter-spacing:-3px; transform:skewX(-12deg); text-shadow:0 6px 12px rgba(0,0,0,.65); }
+  .title em { font-style:normal; color:var(--coral-soft); }
+
+  /* 얼굴 앞 핵심어 팝 (머리 위쪽) */
+  #kw { position:absolute; left:0; right:0; top:230px; text-align:center; display:none; font-size:310px; font-weight:900; letter-spacing:-8px; line-height:1; text-shadow:0 8px 28px rgba(10,67,66,.4); }
+  #kw span { display:inline-block; transform-origin:50% 70%; }
+  #kw em { font-style:normal; color:var(--coral-soft); }
+
+  /* 기준 패널: 화면 40% 어둡게 + 입 아래~Reels 하단 안전선(y1536) 안 */
+  #panel { position:absolute; inset:0; display:none; }
+  #panel .dim { position:absolute; inset:0; background:rgba(0,0,0,.40); }
+  #panel .box { position:absolute; left:189px; width:702px; top:1150px; height:350px; background:var(--ivory); border-radius:32px; padding:18px 36px; box-shadow:0 12px 40px rgba(0,0,0,.35); color:var(--ink); }
+  #panel .ptitle { font-size:28px; font-weight:700; color:var(--teal); margin-bottom:6px; }
+  .row { display:flex; align-items:center; gap:22px; height:88px; padding:0 22px; border-radius:22px; opacity:.35; }
+  .row.on { opacity:1; }
+  .row.now { background:var(--teal); color:#fff; }
+  .row b { width:64px; height:64px; border-radius:50%; background:var(--coral); color:#fff; font-size:36px; font-weight:800; display:flex; align-items:center; justify-content:center; flex:none; }
+  .row span { font-size:52px; font-weight:800; letter-spacing:-1.5px; flex:1; display:inline-block; transform-origin:0 60%; }
+  .ico { width:84px; height:56px; flex:none; position:relative; }
+  .gum::before { content:""; position:absolute; left:4px; right:4px; top:4px; height:24px; border-radius:14px 14px 4px 4px; background:#F2A08C; }
+  .gum::after { content:""; position:absolute; left:14px; right:14px; top:22px; height:30px; background:repeating-linear-gradient(90deg,#fff 0 16px,transparent 16px 22px); border-radius:0 0 8px 8px; }
+  .pos::before { content:""; position:absolute; inset:6px 2px; border-bottom:6px solid currentColor; border-radius:0 0 50% 50%; opacity:.5; }
+  .pos::after { content:""; position:absolute; left:34px; top:2px; width:16px; height:30px; background:#fff; border:3px solid currentColor; border-radius:6px 6px 10px 10px; }
+  .tilt::before { content:""; position:absolute; left:6px; top:8px; width:16px; height:30px; background:#fff; border:3px solid currentColor; border-radius:6px; transform:rotate(-14deg); }
+  .tilt::after { content:""; position:absolute; left:46px; top:12px; width:16px; height:30px; background:#fff; border:3px solid currentColor; border-radius:6px; transform:rotate(18deg); }
+  .check::before { content:""; position:absolute; left:22px; top:6px; width:22px; height:40px; border:solid currentColor; border-width:0 8px 8px 0; transform:rotate(40deg); }
+  .none { display:none; }
+
+  /* 마무리 3단 (M09) */
+  #cta { position:absolute; left:0; right:0; top:1090px; height:330px; display:none; text-shadow:var(--shadow); }
+  #cta .l { position:absolute; left:250px; top:0; font-size:52px; font-weight:500; transform:skewX(-8deg); }
+  #cta .kk { position:absolute; left:0; right:0; top:62px; text-align:center; font-size:142px; font-weight:900; letter-spacing:-4px; color:var(--coral-soft); }
+  #cta .kk span { display:inline-block; transform-origin:50% 60%; }
+  #cta .t { position:absolute; left:420px; top:232px; font-size:52px; font-weight:500; white-space:pre; }
+</style>
+</head>
+<body>
+<div class="ev" id="title"><div class="badge" id="badge"></div><div class="title" id="titleText"></div></div>
+<div id="headline"></div>
+<div id="chat"><div class="bub"><div class="who"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"/><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/></svg></i><span id="chatWho"></span><span class="tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l1.3 -3.9c-2.324 -3.437 -1.426 -7.872 2.1 -10.374c3.526 -2.501 8.59 -2.296 11.845 .48c3.255 2.777 3.695 7.266 1.029 10.501c-2.666 3.235 -7.615 4.215 -11.574 2.293l-4.7 1"/></svg><span id="chatTag"></span></span></div><div class="q" id="chatQ"></div></div></div>
+<div id="kw"><span id="kwText"></span></div>
+<div id="follow"><i></i><span class="ft"><span id="followText"></span><small id="followSub"></small></span><b>팔로우</b></div>
+<div id="panel"><div class="dim"></div><div class="box"><div class="ptitle" id="ptitle"></div><div id="rows"></div></div></div>
+<div id="cta"><div class="l" id="ctaL"></div><div class="kk"><span id="ctaK"></span></div><div class="t" id="ctaT"></div></div>
+<script>
+const P = window.PLAN || {};
+const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+// 자막 문구 표기: "**강조**" → 코랄, "//" → 줄바꿈, "_작게_" → small
+const fmt = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<span class="k">$1</span>').replace(/_(.+?)_/g, "<small>$1</small>").replace(/\s*\/\/\s*/g, "<br>");
+const lerp = (k, t) => { if (t <= k[0][0]) return k[0][1]; for (let i = 1; i < k.length; i++) if (t <= k[i][0]) { const [a, va] = k[i - 1], [b, vb] = k[i]; const x = (t - a) / (b - a); return va + (vb - va) * (1 - (1 - x) ** 2); } return k[k.length - 1][1]; };
+const pop = (el, d) => { el.style.transform = `scale(${lerp([[0, 0], [.05, 1.25], [.117, .96], [.167, 1]], d)})`; el.style.opacity = lerp([[0, 0], [.05, 1]], d); };
+const shake = (el, d, k) => { el.style.transform = `translateX(${lerp([[0, 90], [.05, -16], [.1, 6], [.2, 0]], d) * k}px) skewX(${lerp([[0, 14], [.05, -7], [.1, 3], [.2, 0]], d) * k}deg)`; el.style.opacity = lerp([[0, 0], [.05, 1]], d); };
+const bounce = (el, d) => [...el.querySelectorAll(".ch")].forEach((c, i) => { const x = d - i * 0.033; c.style.transform = `translateY(${lerp([[0, -20], [.033, 4], [.1, 0]], x)}px) scale(${lerp([[0, .9], [.033, 1.1], [.1, 1]], x)})`; c.style.opacity = x < 0 ? 0 : lerp([[0, 0], [.033, 1]], x); });
+const converge = (el, d) => [...el.querySelectorAll(".ch")].forEach((c, i) => { const x = d - i * 0.017; c.style.transform = `scale(${lerp([[0, .25], [.1, .7], [.2, 1]], x)})`; c.style.marginRight = `${lerp([[0, 18], [.1, 8], [.2, 0]], x)}px`; c.style.opacity = x < 0 ? 0 : lerp([[0, 0], [.1, .7], [.2, 1]], x); });
+
+// 제목
+if (P.title) {
+  document.getElementById("badge").textContent = P.title.badge || P.series || "";
+  document.getElementById("titleText").innerHTML = P.title.lines.map((l) => fmt(l).replace(/class="k"/g, "")).map((l) => l.replace(/<span >(.+?)<\/span>/g, "<em>$1</em>")).join("<br>");
+}
+// 자막
+const SUBS = (P.subs || []).map((s) => {
+  const el = document.createElement("div");
+  el.className = "ev " + (s.word ? "word" : s.size === "impact" ? "impact" : "body");
+  const chars = s.motion === "bounce" || s.motion === "converge";
+  el.innerHTML = chars ? `<span class="w">${[...s.text].map((c) => `<span class="ch">${c === " " ? "&nbsp;" : esc(c)}</span>`).join("")}</span>` : `<span class="w">${fmt(s.text)}</span>`;
+  document.body.appendChild(el);
+  // 가로 안전구역(가운데 기준 폭 800px → x 140~940)을 넘는 긴 자막은 글자 크기를 줄인다
+  el.style.display = "block";
+  let fs = parseFloat(getComputedStyle(el).fontSize);
+  while (el.firstChild.getBoundingClientRect().width > 800 && fs > 36) { fs -= 4; el.style.fontSize = fs + "px"; }
+  el.style.display = "none";
+  return { ...s, el, w: el.firstChild };
+});
+// 핵심어
+if (P.keyword) {
+  const K = P.keyword, kw = document.getElementById("kw");
+  document.getElementById("kwText").innerHTML = `${esc(K.text)}<em>${esc(K.mark ?? "?")}</em>`;
+  if (K.top != null) kw.style.top = K.top + "px";
+  if (K.size != null) kw.style.fontSize = K.size + "px";
+  // 가로 안전구역(가운데 기준 폭 800px → x 140~940) 안에 들어오도록 글자 크기 자동 축소
+  kw.style.display = "block";
+  const span = document.getElementById("kwText");
+  let fs = parseFloat(getComputedStyle(kw).fontSize);
+  while (span.getBoundingClientRect().width > 800 && fs > 120) { fs -= 10; kw.style.fontSize = fs + "px"; }
+  kw.style.display = "none";
+}
+if (P.outline === true) document.body.classList.add("outline");
+// 레이어 분리 (03 바로 레이어): LAYER="kw"면 핵심어만, "main"이면 핵심어를 뺀 나머지만 그린다
+const LAYER = window.LAYER || "all";
+// 패널
+const ROWS = [];
+if (P.panel) {
+  document.getElementById("ptitle").textContent = P.panel.title || "";
+  P.panel.items.forEach((it, i) => {
+    const r = document.createElement("div");
+    r.className = "row";
+    r.innerHTML = `<b>${i + 1}</b><span>${esc(it.label)}</span><i class="ico ${it.icon || "none"}"></i>`;
+    document.getElementById("rows").appendChild(r);
+    ROWS.push({ ...it, el: r, span: r.querySelector("span") });
+  });
+}
+// 시청자 질문 말풍선
+if (P.chat) {
+  document.getElementById("chatWho").textContent = P.chat.who || "시청자 질문";
+  document.getElementById("chatTag").textContent = P.chat.tag || "교정 Q&A";
+  document.getElementById("chatQ").innerHTML = fmt(P.chat.text).replace(/class="k"/g, "").replace(/<span >(.+?)<\/span>/g, "<em>$1</em>");
+  if (P.chat.top != null) document.getElementById("chat").style.top = P.chat.top + "px";
+}
+// 06 요소
+const hfmt = (t) => esc(t).replace(/\*\*(.+?)\*\*/g, '<span class="k">$1</span>').replace(/__(.+?)__/g, '<span class="m">$1</span>').replace(/~~(.+?)~~/g, '<span class="x">$1</span>');
+if (P.headline) document.getElementById("headline").innerHTML = P.headline.lines.map(hfmt).join("<br>");
+const PHOTOS = (P.photos || []).map((x) => {
+  const d = document.createElement("div"); d.className = "photo";
+  d.innerHTML = `<img src="${x.src}"><div class="lb">${esc(x.label || "")}</div>` + (x.tag ? `<div class="tg">${esc(x.tag)}</div>` : "");
+  const X = { left: 130, right: 560, center: 345 }[x.side || "center"];
+  d.style.left = X + "px"; d.style.top = (x.top ?? 1100) + "px";
+  document.body.appendChild(d); return { ...x, el: d };
+});
+const PH = P.photos_title; const phead = document.createElement("div"); phead.id = "phead"; phead.className = "ev"; document.body.appendChild(phead);
+if (PH) phead.innerHTML = esc(PH.text).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+const INSETS = (P.insets || []).map((x) => { const d = document.createElement("div"); d.className = "inset"; d.innerHTML = `<img src="${x.src}">`; document.body.appendChild(d); return { ...x, el: d }; });
+if (P.follow) { document.getElementById("followText").textContent = P.follow.text; document.getElementById("followSub").textContent = P.follow.sub || ""; }
+// 07 요소
+if (P.subs_layout === "top") document.body.classList.add("subs-top");
+if (P.subs_color === "navy") document.body.classList.add("subs-navy");
+function d_place(el, x, y) { el.style.left = (x - el.offsetWidth / 2) + "px"; el.style.top = (y - el.offsetHeight / 2) + "px"; }
+const HANDS = (P.hand || []).map((h) => {
+  const d = document.createElement("div");
+  d.className = "hand " + (h.color || "navy");
+  d.style.fontSize = (h.size || 160) + "px";
+  d.innerHTML = String(h.text).split("//").map((line) => [...line.trim()].map((c) => `<span class="hc">${c === " " ? "&nbsp;" : esc(c)}</span>`).join("")).join("<br>");
+  document.body.appendChild(d);
+  d.style.display = "block";
+  d.style.transform = `rotate(${h.rotate ?? -3}deg)`;
+  d.style.display = "none";
+  return { ...h, el: d, chars: [...d.querySelectorAll(".hc")] };
+});
+const wipe = (x) => `linear-gradient(100deg, #000 ${x - 12}%, rgba(0,0,0,.35) ${x}%, transparent ${x + 10}%)`;
+if (P.cta) { document.getElementById("ctaL").textContent = P.cta.label; document.getElementById("ctaK").textContent = P.cta.keyword; }
+
+window.renderAt = (t) => {
+  if (LAYER === "kw") { SUBS.forEach((s) => (s.el.style.display = "none")); renderKw(t); return; }
+  if (LAYER !== "main") renderKw(t); else document.getElementById("kw").style.display = "none";
+  const C2 = P.chat, ch = document.getElementById("chat");
+  if (C2 && t >= C2.start && t < C2.end) {   // 위에서 떨어져 튕기고, 끝 0.2초 동안 위로 빠짐
+    const d = t - C2.start, out = Math.max(0, Math.min(1, (t - (C2.end - 0.2)) / 0.2));
+    const y = lerp([[0, -420], [0.22, 18], [0.32, -8], [0.4, 0]], d) - out * 60;
+    ch.style.display = "block"; ch.style.transform = `translateY(${y}px) rotate(${lerp([[0, -4], [0.3, 1], [0.4, 0]], d)}deg)`;
+    ch.style.opacity = Math.min(1, d / 0.08) * (1 - out);
+  } else ch.style.display = "none";
+  const HL = P.headline; document.getElementById("headline").style.display = HL && t >= (HL.start || 0) && t < HL.end ? "block" : "none";
+  if (PH) { const on = t >= PH.start && t < PH.end; phead.style.display = on ? "block" : "none"; if (on) phead.style.opacity = Math.min(1, (t - PH.start) / 0.2, (PH.end - t) / 0.2); }
+  for (const x of PHOTOS) {   // 옆에서 날아와(0.35초) 살짝 기울어 멈춤, dim 이후엔 흐려짐
+    const on = t >= x.start && t < x.end; x.el.style.display = on ? "block" : "none"; if (!on) continue;
+    const d = t - x.start, k = Math.min(1, d / 0.35), e = 1 - Math.pow(1 - k, 3), dir = x.side === "left" ? -1 : 1;
+    const out = Math.min(1, Math.max(0, (x.end - t) / 0.25)), rot = (x.rotate ?? -2 * dir);
+    x.el.style.transform = `translateX(${(1 - e) * dir * 700}px) rotate(${rot * e}deg) scale(${1 + 0.08 * Math.sin(Math.min(1, d / 0.5) * Math.PI)})`;
+    x.el.style.opacity = out * (x.dim != null && t >= x.dim ? 0.45 : 1);
+  }
+  for (const x of INSETS) { const on = t >= x.start && t < x.end; x.el.style.display = on ? "block" : "none"; if (on) pop(x.el, t - x.start); }
+  for (const h of HANDS) {
+    const on = t >= h.start && t < h.end;
+    h.el.style.display = on ? "block" : "none";
+    if (!on) continue;
+    if (!h.placed) {   // x,y = 글자 덩어리의 가운데. 손글씨 글꼴을 다 불러온 뒤(처음 보일 때) 잰다
+      d_place(h.el, h.x ?? 540, h.y ?? 400); h.placed = true;
+    }
+    const per = h.per ?? 0.13, d = t - h.start, fadeOut = Math.min(1, Math.max(0, (h.end - t) / 0.25));
+    h.el.style.opacity = fadeOut;
+    h.chars.forEach((c, i) => {   // 한 글자씩 순서대로 써짐
+      const x = Math.max(0, Math.min(1, (d - i * per) / per)) * 130 - 10;
+      const m = x >= 119 ? "none" : wipe(x);
+      c.style.webkitMaskImage = m; c.style.maskImage = m;
+    });
+  }
+  const F = P.follow, fo = document.getElementById("follow");
+  fo.style.display = F && t >= F.start ? "flex" : "none";
+  if (F && t >= F.start) fo.style.opacity = Math.min(1, (t - F.start) / 0.2);
+  const T = P.title; document.getElementById("title").style.display = T && t >= (T.start || 0) && t < T.end ? "block" : "none";
+  for (const s of SUBS) {
+    const on = t >= s.start && t < s.end, d = t - s.start;
+    s.el.style.display = on ? "block" : "none";
+    if (!on) continue;
+    s.w.style.transform = ""; s.w.style.opacity = 1;
+    if (s.motion === "pop") pop(s.w, d);
+    else if (s.motion === "shake") shake(s.w, d, 0.5);
+    else if (s.motion === "bounce") bounce(s.w, d);
+    else if (s.motion === "converge") converge(s.w, d);
+  }
+  const PN = P.panel, pn = document.getElementById("panel");
+  pn.style.display = PN && t >= PN.start && t < PN.end ? "block" : "none";
+  ROWS.forEach((r, i) => {
+    const on = t >= r.at, next = ROWS[i + 1] && t >= ROWS[i + 1].at;
+    r.el.classList.toggle("on", on); r.el.classList.toggle("now", on && !next);
+    if (on && !next) pop(r.span, t - r.at); else { r.span.style.transform = ""; r.span.style.opacity = ""; }
+  });
+  const C = P.cta, c = document.getElementById("cta");
+  c.style.display = C && t >= C.start && t < (C.end || 1e9) ? "block" : "none";
+  if (C && t >= C.start) {
+    const d = t - C.start, k = document.getElementById("ctaK");
+    if (d < 0.30) k.style.opacity = 0; else pop(k, d - 0.30);
+    const chars = [...C.tail], dd = d - 0.85, n = Math.min(chars.length, Math.max(0, Math.floor(dd / 0.04)));
+    document.getElementById("ctaT").textContent = dd < 0 ? "" : chars.slice(0, n).join("") + (dd < chars.length * 0.04 + 0.07 ? "_" : "");
+  }
+};
+function renderKw(t) {
+  const K = P.keyword, kw = document.getElementById("kw");
+  kw.style.display = K && t >= K.start && t < K.end ? "block" : "none";
+  if (K && t >= K.start && t < K.end) pop(document.getElementById("kwText"), t - K.start);
+}
+// 팔로우 카드와 겹치지 않게: 카드가 보이는 동안 그 위 요소를 올리고(최대 80px), 그래도 겹치면 글자를 줄인다
+const visible = (el) => el && el.offsetParent !== null && getComputedStyle(el).display !== "none" && parseFloat(getComputedStyle(el).opacity || 1) > 0.01;
+function textBoxes() {   // 글자 요소의 실제 글자 영역 (겹침 계산용)
+  const out = [];
+  document.querySelectorAll(".ev:not(#title)").forEach((e) => visible(e) && out.push({ name: e.id || "자막", el: e, box: (e.querySelector(".w") || e).getBoundingClientRect() }));
+  const cta = document.getElementById("cta");
+  if (visible(cta)) { const r = [...cta.children].map((c) => c.getBoundingClientRect()).filter((r) => r.height); out.push({ name: "마무리", el: cta, box: { top: Math.min(...r.map((x) => x.top)), bottom: Math.max(...r.map((x) => x.bottom)), left: Math.min(...r.map((x) => x.left)), right: Math.max(...r.map((x) => x.right)) } }); }
+  const box = document.querySelector("#panel .box"); if (visible(document.getElementById("panel"))) out.push({ name: "패널", el: box, box: box.getBoundingClientRect() });
+  document.querySelectorAll(".inset, .hand, .photo").forEach((e) => visible(e) && out.push({ name: e.className, el: e, box: e.getBoundingClientRect() }));
+  const kw = document.getElementById("kw"); if (visible(kw)) out.push({ name: "핵심어", el: kw, box: document.getElementById("kwText").getBoundingClientRect() });
+  const ch = document.getElementById("chat"); if (visible(ch)) out.push({ name: "말풍선", el: ch, box: ch.querySelector(".bub").getBoundingClientRect() });
+  const ti = document.getElementById("title"); if (visible(ti)) out.push({ name: "제목", el: ti, box: { top: ti.firstChild.getBoundingClientRect().top, bottom: ti.lastChild.getBoundingClientRect().bottom, left: 0, right: 1080 } });
+  return out;
+}
+function avoidFollow() {
+  for (const b of textBoxes()) { b.el.style.translate = ""; b.el.style.scale = ""; }
+  const fo = document.getElementById("follow");
+  if (!visible(fo)) return;
+  const ft = fo.getBoundingClientRect().top - 18;
+  for (const b of textBoxes()) {
+    if (b.box.bottom <= ft || b.box.top >= fo.getBoundingClientRect().bottom) continue;
+    const need = b.box.bottom - ft, shift = Math.min(need, 80);
+    b.el.style.translate = `0 ${-shift}px`;
+    if (need > shift) {   // 남은 만큼 글자를 줄임 (위쪽 기준)
+      const h = b.box.bottom - b.box.top, sc = Math.max(0.6, (h - (need - shift)) / h);
+      b.el.style.transformOrigin = `50% ${b.box.top}px`; b.el.style.scale = sc;
+    }
+  }
+}
+// 렌더러가 프레임마다 겹침을 검사할 때 쓰는 함수
+window.__overlaps = () => {
+  const bs = textBoxes(), fo = document.getElementById("follow");
+  if (visible(fo)) bs.push({ name: "팔로우 카드", box: fo.getBoundingClientRect() });
+  const hits = [];
+  for (let i = 0; i < bs.length; i++) for (let j = i + 1; j < bs.length; j++) {
+    const a = bs[i].box, b = bs[j].box;
+    const oy = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top), ox = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+    if (oy > 6 && ox > 6) hits.push(`${bs[i].name} × ${bs[j].name}`);
+  }
+  return hits;
+};
+const _renderAt = window.renderAt;
+window.renderAt = (t) => { _renderAt(t); avoidFollow(); };
+window.renderAt(0);
+</script>
+</body>
+</html>

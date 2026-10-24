@@ -1,0 +1,9 @@
+# 대용량·작업 자료: 디스크에 보존하되 Git에는 넣지 않음 (원본 영상/출력물 등)
+/assets/
+/input/
+/output/
+/references/
+/work/
+.DS_Store
+__pycache__/
+*.pyc
