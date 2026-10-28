@@ -9,6 +9,7 @@
 | @tenfoldmarc "17 video effects" | 효과 17가지 | [sources/effects-17.md](sources/effects-17.md) |
 | @corbinsylk "15 video effects" | 효과 15가지 | [sources/effects-15_분류.md](sources/effects-15_분류.md) |
 | @wavideo | 손글씨로 써지는 글자(draw-in), 위쪽 헤드라인 | effects-17 18번 |
+| 자막 모션 42가지 견본 영상 | 자막 모션 42가지 | [sources/motion-42_분석.md](sources/motion-42_분석.md) |
 | 자막 위치 릴스 | 안전구역·시선→자막→후킹 배치 | [placement-guide.md](placement-guide.md) |
 | YSA reels-skills | Reels 규격, motion-polish, 컷 경계 페이드 | [sources/YSA_반영내역.md](sources/YSA_반영내역.md) |
 | KMH 스타일 | 컷편집·전체 자막 | archive/02_바로토크.md |
@@ -50,3 +51,14 @@
 | Cinematic grade | 15 | 어두운 영화 색감 | ✗ 진료실 톤과 안 맞음 | — |
 
 규칙: 한 영상에 새 효과는 1~2개, 숫자·기사·채팅은 실제·직접 만든 것만, 얼굴·입은 가리지 않기 ([sources/effects-17.md](sources/effects-17.md) "병원 영상에 쓸 때 주의").
+| 깜빡이며 켜지기 flicker | 42-20 | 네온처럼 깜빡이며 켜지는 자막 | ✅ | `subs[].motion: flicker` |
+| 초점 맞추기 fade+focus | 42-29 | 흐릿→또렷 | ✅ | `focus` |
+| 천천히 등장 soft | 42-37 | 느린 페이드 | ✅ | `soft` |
+| 줄마다 올라오기 rise | 42-39 | 줄 단위 마스크 상승 | ✅ | `rise` |
+| 형광펜 칠하기 highlight | 42-40 | 강조어에 형광펜 띠 | ✅ | `highlight` |
+| 색 입히기 colorKeys | 42-41 | 회색→색 순서대로 | ✅ | `colorKeys` |
+| 굵기 스왑 textSwap | 42-31 | 굵기 파도 | ✅ | `weight` |
+| 착지 스쿼시 squash | 42-34 | 말풍선 착지 찌그러짐 | ✅ | `chat.motion: squash` |
+| 카드 뒤집기 flip | 42-16 | 앞면→뒷면 3D 뒤집기 | ✅ | `fx: flip_card` |
+| 나머지 33가지 | 42 | [sources/motion-42_분석.md](sources/motion-42_분석.md) 표 참고 | 🔧/✗ | — |
+

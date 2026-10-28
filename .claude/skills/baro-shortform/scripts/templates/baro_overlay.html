@@ -146,6 +146,20 @@
   .ring { width:120px; height:120px; border-radius:50%; border:6px solid #fff; z-index:4; }
   .wallf { border:12px solid #2a2118; outline:4px solid #c9a96e; box-shadow:0 14px 30px rgba(0,0,0,.5); background:#000; }
   .wallf img { width:100%; height:100%; object-fit:cover; }
+  /* 자막 모션 추가 (references/sources/motion-42_분석.md 추천분) */
+  .ev.glow .w { text-shadow:0 0 22px rgba(255,214,150,.85), 0 0 6px rgba(255,214,150,.6), var(--shadow); }
+  .ev .ln { display:block; overflow:hidden; padding:0 .1em .08em; }
+  .ev .ln > span { display:inline-block; }
+  .ev.hl .k { background:linear-gradient(#FFD84D,#FFD84D) no-repeat 0 88% / var(--hw, 0%) 52%; padding:0 .08em; transition:none; }
+  .ev.hl.on .k { color:var(--ink); text-shadow:none; }   /* 띠가 거의 다 칠해지면 글자를 진하게 */
+  .flip { left:190px; width:700px; height:400px; perspective:1600px; }
+  .flip .fi { position:absolute; inset:0; transform-style:preserve-3d; }
+  .flip .fc { position:absolute; inset:0; backface-visibility:hidden; border-radius:34px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:30px; box-shadow:0 18px 40px rgba(0,0,0,.35); }
+  .flip .ff { background:#F6F1E8; color:#5F6B72; font:600 54px/1.3 "Pretendard"; }
+  .flip .ff small { font:700 28px/1 "Pretendard"; color:#8A969D; margin-bottom:18px; }
+  .flip .fb { background:var(--teal); color:#fff; font:800 64px/1.25 "Pretendard"; letter-spacing:-1.5px; transform:rotateY(180deg); }
+  .flip .fb small { font:700 28px/1 "Pretendard"; color:#7FE0D3; margin-bottom:18px; letter-spacing:0; }
+  .flip .k { color:var(--coral-soft); }
 </style>
 </head>
 <body>
@@ -165,6 +179,20 @@ const lerp = (k, t) => { if (t <= k[0][0]) return k[0][1]; for (let i = 1; i < k
 const pop = (el, d) => { el.style.transform = `scale(${lerp([[0, 0], [.05, 1.25], [.117, .96], [.167, 1]], d)})`; el.style.opacity = lerp([[0, 0], [.05, 1]], d); };
 const shake = (el, d, k) => { el.style.transform = `translateX(${lerp([[0, 90], [.05, -16], [.1, 6], [.2, 0]], d) * k}px) skewX(${lerp([[0, 14], [.05, -7], [.1, 3], [.2, 0]], d) * k}deg)`; el.style.opacity = lerp([[0, 0], [.05, 1]], d); };
 const bounce = (el, d) => [...el.querySelectorAll(".ch")].forEach((c, i) => { const x = d - i * 0.033; c.style.transform = `translateY(${lerp([[0, -20], [.033, 4], [.1, 0]], x)}px) scale(${lerp([[0, .9], [.033, 1.1], [.1, 1]], x)})`; c.style.opacity = x < 0 ? 0 : lerp([[0, 0], [.033, 1]], x); });
+// 추가 자막 모션 (subs[].motion). 원리만 참고: references/sources/motion-42_분석.md
+const MOTIONS = {
+  flicker: (el, d) => {   // 20 깜빡이며 켜지기: 네온처럼 몇 번 깜빡인 뒤 켜진 채로
+    const on = [[0, .06], [.11, .15], [.2, .23], [.3, 9]].some(([a, b]) => d >= a && d < b);
+    el.style.opacity = on ? (d < .3 ? .75 : 1) : .08;
+  },
+  focus: (el, d) => { const k = ease(d / .5); el.style.opacity = k; el.style.filter = `blur(${(1 - k) * 14}px)`; },   // 29 초점 맞추기
+  soft: (el, d) => { const k = ease(d / .9); el.style.opacity = k; el.style.transform = `translateY(${(1 - k) * 24}px)`; },   // 37 천천히 등장
+  rise: (el, d) => el.querySelectorAll(".ln > span").forEach((c, i) => { const k = ease((d - i * .14) / .4); c.style.transform = `translateY(${(1 - k) * 110}%)`; }),   // 39 줄마다 올라오기
+  highlight: (el, d) => { el.style.opacity = Math.min(1, d / .15); const k = ease((d - .25) / .45); el.style.setProperty("--hw", k * 100 + "%"); el.parentNode.classList.toggle("on", k > .9); },   // 40 형광펜 (자막의 **강조어**에 칠함)
+  colorKeys: (el, d, s) => el.querySelectorAll(".ch").forEach((c, i) => { c.style.color = d - .15 - i * .045 >= 0 ? (s.color || "var(--coral-soft)") : "#9AA1A6"; }),   // 41 색 입히기
+  weight: (el, d) => { const cs = el.querySelectorAll(".ch"), n = cs.length;   // 31 굵기 스왑: 굵기 파도가 지나가고 굵게 멈춤
+    cs.forEach((c, i) => { const x = d / .8 * (n + 4) - i; c.style.fontWeight = Math.round(x < 0 ? 300 : x < 2 ? 300 + 600 * x / 2 : x < 4 ? 900 - 100 * (x - 2) / 2 : 800); }); },
+};
 const converge = (el, d) => [...el.querySelectorAll(".ch")].forEach((c, i) => { const x = d - i * 0.017; c.style.transform = `scale(${lerp([[0, .25], [.1, .7], [.2, 1]], x)})`; c.style.marginRight = `${lerp([[0, 18], [.1, 8], [.2, 0]], x)}px`; c.style.opacity = x < 0 ? 0 : lerp([[0, 0], [.1, .7], [.2, 1]], x); });
 
 // 제목
@@ -176,8 +204,10 @@ if (P.title) {
 const SUBS = (P.subs || []).map((s) => {
   const el = document.createElement("div");
   el.className = "ev " + (s.word ? "word" : s.size === "impact" ? "impact" : "body");
-  const chars = s.motion === "bounce" || s.motion === "converge";
-  el.innerHTML = chars ? `<span class="w">${[...s.text].map((c) => `<span class="ch">${c === " " ? "&nbsp;" : esc(c)}</span>`).join("")}</span>` : `<span class="w">${fmt(s.text)}</span>`;
+  const chars = ["bounce", "converge", "colorKeys", "weight"].includes(s.motion);
+  if (s.motion === "flicker") el.classList.add("glow");
+  if (s.motion === "highlight") el.classList.add("hl");
+  el.innerHTML = s.motion === "rise" ? `<span class="w">${s.text.split(/\s*\/\/\s*/).map((l) => `<span class="ln"><span>${fmt(l)}</span></span>`).join("")}</span>` : chars ? `<span class="w">${[...s.text].map((c) => `<span class="ch">${c === " " ? "&nbsp;" : esc(c)}</span>`).join("")}</span>` : `<span class="w">${fmt(s.text)}</span>`;
   document.body.appendChild(el);
   // 가로 안전구역(가운데 기준 폭 800px → x 140~940)을 넘는 긴 자막은 글자 크기를 줄인다
   el.style.display = "block";
@@ -260,7 +290,8 @@ window.renderAt = (t) => {
   if (C2 && t >= C2.start && t < C2.end) {   // 위에서 떨어져 튕기고, 끝 0.2초 동안 위로 빠짐
     const d = t - C2.start, out = Math.max(0, Math.min(1, (t - (C2.end - 0.2)) / 0.2));
     const y = lerp([[0, -420], [0.22, 18], [0.32, -8], [0.4, 0]], d) - out * 60;
-    ch.style.display = "block"; ch.style.transform = `translateY(${y}px) rotate(${lerp([[0, -4], [0.3, 1], [0.4, 0]], d)}deg)`;
+    const sq = C2.motion === "squash" ? `scale(${lerp([[0, .92], [.2, .92], [.26, 1.1], [.36, .97], [.46, 1]], d)}, ${lerp([[0, 1.1], [.2, 1.1], [.26, .86], [.36, 1.04], [.46, 1]], d)})` : "";   // 착지 스쿼시: 떨어질 땐 세로로 늘었다 닿는 순간 납작
+    ch.style.display = "block"; ch.style.transformOrigin = "50% 100%"; ch.style.transform = `translateY(${y}px) rotate(${lerp([[0, -4], [0.3, 1], [0.4, 0]], d)}deg) ${sq}`;
     ch.style.opacity = Math.min(1, d / 0.08) * (1 - out);
   } else ch.style.display = "none";
   const HL = P.headline; document.getElementById("headline").style.display = HL && t >= (HL.start || 0) && t < HL.end ? "block" : "none";
@@ -301,6 +332,7 @@ window.renderAt = (t) => {
     else if (s.motion === "shake") shake(s.w, d, 0.5);
     else if (s.motion === "bounce") bounce(s.w, d);
     else if (s.motion === "converge") converge(s.w, d);
+    else if (MOTIONS[s.motion]) MOTIONS[s.motion](s.w, d, s);
   }
   const PN = P.panel, pn = document.getElementById("panel");
   pn.style.display = PN && t >= PN.start && t < PN.end ? "block" : "none";
@@ -389,6 +421,9 @@ const FX = (P.fx || []).map((x) => {
     const mx = Math.max(...x.data.map((d) => d.value));
     f.el = mk("chart", `<div class="ch-t">${esc(x.title || "")}</div><div class="bars">${x.data.map((d) => `<div class="bar"><b>${esc(d.value + (x.unit || ""))}</b><i data-h="${(d.value / mx) * 230}"></i><span>${esc(d.label)}</span></div>`).join("")}</div><div class="ch-s">${esc(x.source || "")}</div>`, "차트");
     f.el.style.top = (x.top ?? 1040) + "px"; f.parts = [...f.el.querySelectorAll(".bar i")];
+  } else if (x.type === "flip_card") {   // 16 카드 뒤집기: 앞면(흔한 생각) → flip_at에 뒤집혀 뒷면(실제)
+    f.el = mk("flip", `<div class="fi"><div class="fc ff"><small>${esc(x.front_label || "흔한 생각")}</small><div>${fmt(x.front || "")}</div></div><div class="fc fb"><small>${esc(x.back_label || "실제로는")}</small><div>${fmt(x.back || "")}</div></div></div>`, "카드 뒤집기");
+    f.el.style.top = (x.top ?? 1040) + "px"; f.inner = f.el.querySelector(".fi");
   } else if (x.type === "iris") {   // 원형 열림·닫힘 전환
     f.el = mk("iris", "");
   } else if (x.type === "paper_cut") {   // 종이 콜라주: 오려 붙인 종이 + 번호 스티커
@@ -420,6 +455,9 @@ function drawFx(t) {
         p.style.left = cx + rx * Math.cos(th) - 90 + "px"; p.style.top = cy + ry * z - 90 + "px"; p.style.transform = `scale(${0.75 + 0.25 * (z + 1) / 2})`; p.style.zIndex = z > 0 ? 3 : 1; p.style.opacity = a * (0.6 + 0.4 * (z + 1) / 2); });
     } else if (f.type === "headline_wall" || f.type === "paper_cut") {
       f.parts.forEach((p, i) => { const k = d - i * (f.step ?? 0.25); p.style.display = k >= 0 ? "block" : "none"; p.style.opacity = a; p.style.transform = `rotate(${p.dataset.r}deg) scale(${lerp([[0, 1.6], [0.12, 0.94], [0.2, 1]], k)})`; });
+    } else if (f.type === "flip_card") {
+      f.el.style.opacity = a; f.el.style.transform = `translateY(${(1 - ease(d / 0.35)) * 120}px)`;
+      const k = ease((d - (f.flip_at ?? 1.2)) / 0.5); f.inner.style.transform = `rotateY(${k * 180}deg) scale(${1 + 0.06 * Math.sin(k * Math.PI)})`;
     } else if (f.type === "iris") {   // mode open: 검은 화면에서 원이 커지며 열림 / close: 반대
       const k = ease(d / (f.dur ?? 0.6)), r = f.mode === "close" ? (f.min ?? 150) + (1250 - (f.min ?? 150)) * (1 - k) : k * 1250,   // 닫힘은 얼굴 둘레 원에서 멈춤 (완전 검은 화면은 Reels 검사 실패)
          [cx, cy] = f.center || [540, 760];

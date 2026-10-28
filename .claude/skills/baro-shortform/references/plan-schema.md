@@ -32,7 +32,7 @@
 | `title` | 앞 무음 구간의 배지 + 사선 제목. `lines`의 `**단어**`는 코랄 강조. 첫 대사가 시작되면 끝낸다 (`end`) |
 | `subs[].text` | `**강조**` 코랄 굵게 · `_작게_` 작은 글씨 · `//` 줄바꿈. 1~2줄, 한 줄 15자 안팎 |
 | `subs[].size` | `body`(56px, 기본) / `impact`(104px, 결론·주의 환기) |
-| `subs[].motion` | 없음(즉시 교체) / `pop`(0→125→96→100%) / `shake`(약한 흔들림 정착, 질문) / `bounce`(글자별 바운스) / `converge`(자간 수렴). `bounce`·`converge`는 강조 표기를 쓰지 않는다 |
+| `subs[].motion` | 없음(즉시 교체) / `pop`(0→125→96→100%) / `shake`(약한 흔들림 정착, 질문) / `bounce`(글자별 바운스) / `converge`(자간 수렴). `bounce`·`converge`는 강조 표기를 쓰지 않는다. 추가: `flicker` `focus` `soft` `rise` `highlight` `colorKeys` `weight` ([options.md](options.md) 10번) |
 | `keyword` | 얼굴 앞 큰 핵심어 팝 (머리 위쪽, 310px). 영상당 1회, 약 1초. 보통 결론 펀치인과 같은 시각 |
 | `panel` | 화면 40% 어둡게 + 하단 기준 패널 (y 1150~1530). `items[].at`에 그 항목이 켜지고, 지금 말하는 항목만 틸 배경 + 팝. `end`는 그 문장이 끝날 때. `icon`: `gum`(잇몸) `pos`(치아 위치) `tilt`(기울어진 치아) `check`(체크) `none` |
 | `cta` | 마무리 3단: 작은 라벨 → 0.30초 뒤 큰 키워드 팝 → 0.85초 뒤 타자기 꼬리 문구. 영상 끝까지 |
